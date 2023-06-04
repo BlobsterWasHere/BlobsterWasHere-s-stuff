@@ -1,0 +1,39 @@
+import requests
+
+def get_group_info(group_id):
+    url = f"https://groups.roblox.com/v1/groups/{GROUP YOU WANT TO SEARCH}"
+    response = requests.get(url)
+    data = response.json()
+    return data
+
+def get_group_members(group_id):
+    url = f"https://groups.roblox.com/v1/groups/{MEMBERS OF THE GROUP YOU WANT TO SEARCH}/users"
+    params = {
+        "sortOrder": "Asc",
+        "limit": SET YOUR OWN LIMIT (RECOMENDED 100), 
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    return data
+
+def scan_groups(group_ids):
+    for group_id in group_ids:
+        group_info = get_group_info(group_id)
+        group_name = group_info['name']
+        group_member_count = group_info['memberCount']
+        print(f"Group Name: {group_name}")
+        print(f"Member Count: {group_member_count}")
+
+        group_members = get_group_members(group_id)
+        if 'data' in group_members:
+            for member in group_members['data']:
+                member_username = member['user']['username']
+                member_role = member['role']['name']
+                print(f"Member: {member_username} | Role: {member_role}")
+        else:
+            print("No members found.")
+        print("------")
+
+
+group_ids = [] 
+scan_groups(group_ids)
