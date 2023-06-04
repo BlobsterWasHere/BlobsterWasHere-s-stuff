@@ -1,0 +1,194 @@
+#--------------------------
+#THIS CODE IS COPPIED FROM MY PYTHON FILE SO IT MAY INCLUDE SOME ITEMS THAT RELATE TO MY BOT
+#--------------------------
+
+
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
+
+filter_enabled = False
+
+
+@client.event
+async def on_ready():
+    print('The bot has updated!')
+
+
+@client.event
+async def on_message(message):
+    global filter_enabled
+
+    if message.author == client.user:
+        return
+
+    if message.content.startswith('!cmds'):
+        embed = discord.Embed(title='Available Commands:')
+        embed.add_field(name='!cmds', value='Shows the current commands available', inline=False)
+        embed.add_field(name='!version', value='Shows the current version', inline=False)
+        embed.add_field(name='!patches', value='Shows the patch notes', inline=False)
+        embed.add_field(name='!plans', value='Shows the future plans with the bot', inline=False)
+        embed.add_field(name='!f-disable', value='Disables the filter (needs a rank called Mod to use)', inline=False)
+        embed.add_field(name='!f-enable', value='Enables the filter (needs a rank called Mod to use)', inline=False)
+        embed.add_field(name='!mute-user @user', value='Mutes the selected user Eg: !mute @user', inline=False)
+        embed.add_field(name='!unmute-user @user', value='Un-mutes the selected user Eg: !unmute @user', inline=False)
+        embed.add_field(name='!discord', value='Join the Discord!', inline=False)
+        await message.channel.send(embed=embed)
+
+    if message.content.startswith('!f-enable'):
+        mod_role_name = 'Mod'
+        mod_role_power = 100
+
+        mod_role = discord.utils.get(message.guild.roles, name=mod_role_name)
+
+        if mod_role is None:
+            await message.channel.send('You need to create a "Mod" role.')
+            return
+
+        if mod_role in message.author.roles and message.author.top_role >= mod_role:
+            filter_enabled = True
+            embed = discord.Embed(title='Filter enabled',
+                                  description='You have enabled the filter. Use !f-disable to disable it.')
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send('You do not have the required permissions to use this command.')
+
+    if message.content.startswith('!f-disable'):
+        mod_role_name = 'Mod'
+        mod_role_power = 100
+
+        mod_role = discord.utils.get(message.guild.roles, name=mod_role_name)
+
+        if mod_role is None:
+            await message.channel.send('You need to create a "Mod" role.')
+            return
+
+        if mod_role in message.author.roles and message.author.top_role >= mod_role:
+            filter_enabled = False
+            embed = discord.Embed(title='Filter disabled', description='You have disabled the filter.')
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send('You do not have the required permissions to use this command.')
+
+    if message.content.startswith('!version'):
+        embed = discord.Embed(title='Bot Version:')
+        embed.add_field(name='', value='', inline=False)
+        await message.channel.send(embed=embed)
+
+    if message.content.startswith('!patches'):
+        embed = discord.Embed(title='Patch notes:')
+        embed.add_field(name='', value='',
+                        inline=False)
+        await message.channel.send(embed=embed)
+        
+     if message.content.startswith('!creidts'):
+        embed = discord.Embed(title='Makers of this:')
+        embed.add_field(name='The Discord:', value=' https://discord.gg/yMAHcznrgr ',
+                        inline=False)
+        await message.channel.send(embed=embed)
+
+    if message.content.startswith('!guide'):
+        embed = discord.Embed(title='YOUR BOT'S Guid and set-up:')
+        embed.add_field(name='TOS/Privacy policy', value='', inline=False) #YOUR TOS
+        embed.add_field(name='Set up guide', value='', inline=False) #YOUR SET UP GUIDE HERE
+        embed.add_field(name='Discord Help server', value= "", inline=False)  #YOUR HELP SERVER HERE
+        await message.channel.send(embed=embed)
+
+    if message.content.startswith('!discord'):
+        embed = discord.Embed(title="discord:")
+        embed.add_field(name='Discord Help server', value='', inline=False) #YOUR DISCORD SERVER HERE
+        await message.channel.send(embed=embed)
+
+    filtered_words = ["naughty", "badword"] #THE WORDS YOU WANT TO FILTER ESPECIALLY (TO STOP PATTERNY BYPASS)
+    filter_patterns = ["pattern1", "pattern2"] #REPLACE THIS WITH THE PATTERNS YOU WANT TO RECONIZE
+
+    if filter_enabled and any(message.content.lower().startswith(pattern) for pattern in filter_patterns):
+        role = discord.utils.get(message.guild.roles, name='Muted')
+
+        if filter_enabled and any(message.content.lower().startswith(pattern) for pattern in filtered_words):
+            role = discord.utils.get(message.guild.roles, name='Muted')
+
+        if role is None:
+            await message.channel.send('You need to add a Muted role.')
+        elif message.guild.me.top_role <= role:
+            await message.channel.send('Please set my role higher than the muted role.')
+        else:
+            embed = discord.Embed(title='User Muted', color=0xff0000)
+            embed.add_field(name='User', value=message.author.mention)
+            embed.add_field(name='Reason', value='Using filtered word')
+            await message.channel.send(embed=embed)
+            await message.author.add_roles(role)
+            await message.delete()
+
+    bot = commands.Bot(command_prefix='!', intents=intents)
+
+    if message.content.startswith('!unmute-user'):
+        mod_role = discord.utils.get(message.guild.roles, name='Mod')
+        if mod_role not in message.author.roles:
+            await message.channel.send("you do not have permission to use this command or you do not have a 'Mod' Role")
+            return
+
+        if len(message.mentions) > 0:
+            member = message.mentions[0]
+
+            muted_role = discord.utils.get(message.guild.roles, name='Muted')
+            if not muted_role:
+                await message.channel.send("The 'Muted' role does not exist. Please add it to the server's roles and position it below the 'Mod' role.")
+                return
+
+            if muted_role.position >= mod_role.position:
+                await message.channel.send("Please position the 'Mod' role above the 'Muted' role.")
+                return
+
+            if muted_role in member.roles:
+                await member.remove_roles(muted_role)
+                await message.channel.send(f'{member.mention} has been unmuted.')
+            else:
+                await message.channel.send(f'{member.mention} is not muted.')
+        else:
+            await message.channel.send('Please mention a member to unmute.')
+
+    if message.content.startswith('!mute-user'):
+        mod_role = discord.utils.get(message.guild.roles, name='Mod')
+        if mod_role not in message.author.roles:
+            await message.channel.send('You do not have permission to use this command.')
+            return
+
+        muted_role = discord.utils.get(message.guild.roles, name='Muted')
+        if not muted_role:
+            await message.channel.send("The 'Muted' role does not exist. Please add it to the server's roles.")
+            return
+
+        if len(message.mentions) == 0:
+            await message.channel.send('Please mention a member to mute.')
+            return
+
+        member = message.mentions[0]
+        if muted_role in member.roles:
+            await message.channel.send('The user is all ready muted!')
+        else:
+            await member.add_roles(muted_role)
+            await message.channel.send('Muted the user sucessfully!')
+
+    await bot.process_commands(message)
+
+    if message.content.startswith("!log"):
+        mod_role = discord.utils.get(message.guild.roles, name='Mod')
+        if mod_role not in message.author.roles:
+            await message.channel.send("you do not have permission to use this command or you do not have a 'Mod' Role")
+            return
+
+    muted_role = discord.utils.get(message.guild.roles, name='Muted')
+    if not muted_role:
+        await message.channel.send("The 'Muted' role does not exist. Please add it to the server's roles.")
+        return
+
+    if len(message.mentions) == 0:
+        await message.channel.send('Please mention a member to mute.')
+        return
+
+client.run('TOEKN HERE (DONT SHARE THIS!!!) ')
