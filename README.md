@@ -14,3 +14,13 @@ Info:
 Please join my discord server! ------>  https://discord.gg/yMAHcznrgr, it would help a bunch!
 
 I am a 13 year old dev who is trying to help everyone and trying to make money for my skills. (Don't let my age discorage you) 
+
+---------------------------
+How To start/use:
+---------------------------
+
+To use this discord.py file you need to install all the packages such as discord within the python file and pip (wich should be automatocally installed on anything up to date) 
+
+Discord.py download -----> https://pypi.org/project/discord.py/
+
+You do not have to use this download as there is allways another way to install it as with the reposetory, i use pycharm so it is in the corner with the packages install area then just search 'discord'. Make sure to call the function.
