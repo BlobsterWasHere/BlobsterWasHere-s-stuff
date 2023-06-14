@@ -84,7 +84,7 @@ async def on_message(message):
                         inline=False)
         await message.channel.send(embed=embed)
         
-     if message.content.startswith('!creidts'):
+     if message.content.startswith('!credits'):
         embed = discord.Embed(title='Makers of this:')
         embed.add_field(name='The Discord:', value=' https://discord.gg/yMAHcznrgr ',
                         inline=False)
