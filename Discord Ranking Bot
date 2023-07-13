@@ -1,0 +1,165 @@
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user.name} ({bot.user.id})')
+    activity = discord.Game(name="Officers can run '!log'")
+    await bot.change_presence(activity=activity)
+
+
+@bot.command()
+@commands.has_role('Officer')
+async def log(ctx, *users: discord.Member):
+    if not users:
+        await ctx.send("Please provide users by mentioning them, e.g., `!log @User1 @User2`.")
+        return
+
+    for user in users:
+        roles = [role.name for role in user.roles]
+        current_role = next((role for role in roles if role.startswith('EP-')), None)
+
+        if current_role:
+            roll_number = int(current_role.split('-')[1])
+            if roll_number < 20:
+                await user.remove_roles(discord.utils.get(user.guild.roles, name=current_role))
+                new_roll = f'EP-{roll_number + 1}'
+                await user.add_roles(discord.utils.get(user.guild.roles, name=new_roll))
+                await ctx.send(f"Added {new_roll} and removed {current_role} for {user.mention}.")
+
+                if roll_number == 4:
+                    await user.add_roles(discord.utils.get(user.guild.roles, name='E2 | Private First Class'))
+                    await user.remove_roles(discord.utils.get(user.guild.roles, name='E1 | Private'))
+                    await ctx.send(
+                        f"{user.mention} ranked up to 'E2 | Private First Class' and received the 'E2 | Private First Class' role. The 'E1 | Private' role has been removed.")
+                elif roll_number == 9:
+                    await user.add_roles(discord.utils.get(user.guild.roles, name='E3 | Lance Corporal'))
+                    await user.remove_roles(discord.utils.get(user.guild.roles, name='E2 | Private First Class'))
+                    await ctx.send(
+                        f"{user.mention} ranked up to 'E3 | Lance Corporal' and received the 'E3 | Lance Corporal' role. The 'E2 | Private First Class' role has been removed.")
+                elif roll_number == 19:
+                    await user.add_roles(discord.utils.get(user.guild.roles, name='E4 | Corporal'))
+                    await user.remove_roles(discord.utils.get(user.guild.roles, name='E3 | Lance Corporal'))
+                    await ctx.send(
+                        f"{user.mention} ranked up to 'E4 | Corporal' and received the 'E4 | Corporal' role. The 'E3 | Lance Corporal' role has been removed.")
+                elif roll_number == 19:
+                    await ctx.send(
+                        f"{user.mention} Is now or still the max rank, they cannot rank up.")
+
+        else:
+            await user.add_roles(discord.utils.get(user.guild.roles, name='EP-1'))
+            await user.add_roles(discord.utils.get(user.guild.roles, name='----------- EP ROLES -----------'))
+            await user.add_roles(discord.utils.get(user.guild.roles, name='----------- OTHER ROLES -----------'))
+            await user.add_roles(discord.utils.get(user.guild.roles, name='E1 | Private'))
+            await ctx.send(f"Added EP and created log for {user.mention}. You have also ranked up!")
+
+
+@log.error
+async def log_error(ctx, error):
+    if isinstance(error, commands.MissingRole):
+        await ctx.send("You do not have permission to use this command. Only users with the 'Officer' role can run `!log`.")
+
+
+@bot.command()
+@commands.has_role('Officer')
+async def remove(ctx, user: discord.Member):
+    roles = [role.name for role in user.roles]
+    ep_roles = [role for role in roles if role.startswith('EP-')]
+
+    if ep_roles:
+        for role in ep_roles:
+            await user.remove_roles(discord.utils.get(user.guild.roles, name=role))
+        await ctx.send(f"EP roles removed from {user.mention}.")
+    else:
+        await ctx.send(f"{user.mention} does not have any EP roles.")
+
+
+@remove.error
+async def remove_error(ctx, error):
+    if isinstance(error, commands.MissingRole):
+        await ctx.send("You do not have permission to use this command. Only users with the 'Officer' role can run `!remove`.")
+
+
+@bot.command()
+async def cmds(ctx):
+    embed = discord.Embed(title="Available Commands", color=discord.Color.green())
+    embed.add_field(name="!cmds", value="This command shows the public commands", inline=False)
+    embed.add_field(name="!log", value="This command logs EP and adds EP (Officer only)", inline=False)
+    embed.add_field(name="!remove", value="This command removes EP roles from a user (Officer only)", inline=False)
+    embed.add_field(name="!progress", value="Shows progress till next rank", inline=False)
+    embed.add_field(name="!credit", value="Made by 'blobsterwashere' on discord", inline=False)
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def progress(ctx):
+    user = ctx.author
+    roles = [role.name for role in user.roles]
+    current_role = next((role for role in roles if role.startswith('EP-')), None)
+
+    if current_role:
+        roll_number = int(current_role.split('-')[1])
+        if roll_number >= 20:
+            await ctx.send("You have reached the maximum rank.")
+            return
+
+        next_ranks = ['EP-5', 'EP-10', 'EP-20']
+        next_rank = next((rank for rank in next_ranks if int(rank.split('-')[1]) > roll_number), None)
+
+        if next_rank:
+            next_rank_percentage = ((roll_number + (5 - roll_number % 5)) / 20) * 100
+            progress_bar = ''.join('▰' if i < next_rank_percentage / 5 else '▱' for i in range(20))
+            embed = discord.Embed(title="Rank Progress", color=discord.Color.blue())
+            embed.add_field(name="Current Rank", value=current_role, inline=False)
+            embed.add_field(name="Next Rank", value=next_rank, inline=False)
+            embed.add_field(name="Progress Till Next Rank", value=f"{next_rank_percentage:.1f}%", inline=False)
+            embed.add_field(name="Progress Bar", value=progress_bar, inline=False)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("You have reached the maximum rank.")
+    else:
+        embed = discord.Embed(title="Rank Progress", color=discord.Color.blue())
+        embed.add_field(name="Current Rank: 0-EP", value="Next Rank: 1-EP", inline=False)
+        await ctx.send(embed=embed)
+
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    if message.content.startswith('!log') or message.content.startswith('!Log'):
+        await bot.process_commands(message)
+
+    if message.content.startswith('!progress'):
+        await bot.process_commands(message)
+
+    if message.content.startswith('!test'):
+        print("a")
+
+    if message.content.startswith('!Offline'):
+        await bot.close()
+
+
+@bot.event
+async def on_member_update(before, after):
+    roles_before = [role.name for role in before.roles]
+    roles_after = [role.name for role in after.roles]
+
+    if 'EP-1' in roles_before and 'EP-2' not in roles_after:
+        await after.add_roles(discord.utils.get(after.guild.roles, name='E1 | Private'))
+        await after.guild.get_channel(1114671614198554716).send(f"{after.mention} has ranked up to 'E1 | Private'.")
+
+    elif 'EP-8' in roles_before and 'EP-9' not in roles_after:
+        await after.remove_roles(discord.utils.get(after.guild.roles, name='E1 | Private'))
+        await after.add_roles(discord.utils.get(after.guild.roles, name='E2 | Private First Class'))
+        await after.guild.get_channel(1114671614198554716).send(f"{after.mention} has ranked up to 'E2 | Private First Class'.")
+
+
+bot.run('TOKEN')
