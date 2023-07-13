@@ -154,12 +154,12 @@ async def on_member_update(before, after):
 
     if 'EP-1' in roles_before and 'EP-2' not in roles_after:
         await after.add_roles(discord.utils.get(after.guild.roles, name='E1 | Private'))
-        await after.guild.get_channel(1114671614198554716).send(f"{after.mention} has ranked up to 'E1 | Private'.")
+        await after.guild.get_channel().send(f"{after.mention} has ranked up to 'E1 | Private'.")
 
     elif 'EP-8' in roles_before and 'EP-9' not in roles_after:
         await after.remove_roles(discord.utils.get(after.guild.roles, name='E1 | Private'))
         await after.add_roles(discord.utils.get(after.guild.roles, name='E2 | Private First Class'))
-        await after.guild.get_channel(1114671614198554716).send(f"{after.mention} has ranked up to 'E2 | Private First Class'.")
+        await after.guild.get_channel().send(f"{after.mention} has ranked up to 'E2 | Private First Class'.")
 
 
 bot.run('TOKEN')
