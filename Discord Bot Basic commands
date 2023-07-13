@@ -1,6 +1,3 @@
-#--------------------------
-#THIS CODE IS COPPIED FROM MY PYTHON FILE SO IT MAY INCLUDE SOME ITEMS THAT RELATE TO MY BOT
-#--------------------------
 
 import discord
 from discord.ext import commands
