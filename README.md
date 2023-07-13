@@ -11,9 +11,8 @@ Requirements to use:
 Info:
 ---------------------------
 
-Please join my discord server! ------>  https://discord.gg/yMAHcznrgr, it would help a bunch!
-
-I am a 13 year old dev who is trying to help everyone and trying to make money for my skills. (Don't let my age discorage you) 
+Discord: blobsterwashere
+Extra: Hire me on hiddendevs for discord bot coding (cheap) and graphic designs.
 
 ---------------------------
 How To start/use:
