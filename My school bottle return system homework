@@ -1,0 +1,142 @@
+import os
+import time
+
+account_numbers1 = [1, 2, 3]
+bottles = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+OBottles = []
+account_points = {}
+account_passwords = {}
+admin_password = "SGS-Admin"
+
+def clear_console():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def open():
+    print("Hello, Welcome to the Bottle Return System.")
+    print("")
+    print("1: Open account (Log out bought bottle)")
+    print("2: Open account (Return bought bottle)")
+    print("3: Create account")
+    print("4: Check the bottles in or out")
+    print("5: Add funds to account (Admin only)")
+    print("")
+
+def open_account():
+    print("")
+    print("Option 1 selected")
+    account_number = int(input("Enter the account number: "))
+    if account_number in account_numbers1:
+        print("Account number found.")
+        bottle_number = int(input("Enter the bottle number: "))
+        if bottle_number in bottles:
+            bottles.remove(bottle_number)
+            OBottles.append(bottle_number)
+            deduct_points(account_number, 3)
+            print("The bottle has been logged out for account number", account_number)
+            print("£3 has been deducted from your account.")
+            print("")
+            print("Remaining bottle numbers are", bottles)
+            print("The taken out bottle numbers are", OBottles)
+        else:
+            print("Bottle number not found!")
+    else:
+        print("Account number not found!")
+
+def return_bottle():
+    print("")
+    print("Option 2 selected")
+    account_number = input("Enter the account number: ")
+    if account_number in account_numbers1:
+        print("Account number found.")
+        bottle_number = int(input("Enter the bottle number: "))
+        if bottle_number in OBottles:
+            OBottles.remove(bottle_number)
+            bottles.append(bottle_number)
+            add_points(account_number, 1.5)
+            print("The bottle has been returned for account number", account_number)
+            print("£1.50 has been added back to your account.")
+            print("")
+            print("Remaining bottle numbers are", bottles)
+            print("The taken out bottle numbers are", OBottles)
+        else:
+            print("Bottle number not found!")
+    else:
+        print("Account number not found!")
+
+def create_account():
+    print("")
+    print("Option 3 selected")
+    account_number = int(input("Enter the account number: "))
+    if account_number not in account_numbers1:
+        account_numbers1.append(account_number)
+        account_points[account_number] = 0
+        print("Account created successfully!")
+        print("Updated account numbers:", account_numbers1)
+    else:
+        print("Account number already exists!")
+
+def add_funds():
+    print("")
+    print("Option 5 selected (Admin access required)")
+    admin_pass = input("Enter the admin password: ")
+    if admin_pass == admin_password:
+        account_number = int(input("Enter the account number to add funds: "))
+        if account_number in account_numbers1:
+            amount = float(input("Enter the amount to add: £"))
+            add_points(account_number, amount)
+            print("£", amount, "has been added to account", account_number)
+        else:
+            print("Account number not found!")
+    else:
+        print("Incorrect admin password. Access denied.")
+
+def check_account_funds():
+    print("")
+    account_number = int(input("Enter the account number to check funds: "))
+    if account_number in account_numbers1:
+        print("Account number found.")
+        print("Account funds: £", account_points[account_number])
+    else:
+        print("Account number not found!")
+
+def deduct_points(account_number, amount):
+    if account_number in account_points:
+        account_points[account_number] -= amount
+
+def add_points(account_number, amount):
+    if account_number in account_points:
+        account_points[account_number] += amount
+
+def check():
+    print(" ")
+    print("The Bottles currently out are: ", OBottles)
+    print("The Bottles currently in are:", bottles)
+    print("Account points:", account_points)
+    time.sleep(5)
+
+while True:
+    clear_console()
+    open()
+    opener = input("Choose an option, please (or enter 'exit' to quit): ")
+
+    if opener == "4":
+        check()
+    elif opener == "1":
+        open_account()
+    elif opener == "2":
+        return_bottle()
+    elif opener == "3":
+        create_account()
+    elif opener == "5":
+        add_funds()
+    elif opener == "6":
+        check_account_funds()
+    elif opener.lower() == "exit":
+        print("Exiting the Bottle Return System. Goodbye!")
+        break
+    else:
+        print("Invalid option chosen. Please try again.")
+
+    print("") 
+
+    time.sleep(2)
